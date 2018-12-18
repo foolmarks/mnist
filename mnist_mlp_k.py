@@ -17,11 +17,6 @@ def get_script_directory():
         return os.path.dirname(path)
 
 
-
-# ignore this - just reduces messages in the console
-os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
-
-
 # hyper-parameters
 LEARNRATE = 0.0001
 EPOCHS = 3
