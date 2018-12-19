@@ -130,8 +130,10 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 # Create & run the graph in a Session
 #####################################################
 
+
 # Launch the graph
 with tf.Session() as sess:
+
     sess.run(tf.initializers.global_variables())
 
     # Training cycle with training data
@@ -140,20 +142,22 @@ with tf.Session() as sess:
 
         # process all batches
         for i in range(total_batches):
-
+            
             # fetch a batch from training dataset
             batch_x, batch_y = x_train[i*BATCHSIZE:i*BATCHSIZE+BATCHSIZE], y_train[i*BATCHSIZE:i*BATCHSIZE+BATCHSIZE]
 
-            # Run graph for optimization, loss, accuracy - i.e. do the training
-            _, ls, acc = sess.run([optimizer, loss, accuracy], feed_dict={x: batch_x, y: batch_y})
-
-            # Display loss per batch
+            # calculate training accuracy every 100 batches
             if i % 100 == 0:
-              print (" Batch:", i, ' Accuracy: ', acc)
+                acc = sess.run(accuracy, feed_dict={x: batch_x, y: batch_y})
+                print (" Batch:", i, ' Accuracy: ', acc)
+
+            # Run graph for optimization - i.e. do the training
+            sess.run([optimizer, loss, accuracy], feed_dict={x: batch_x, y: batch_y})
 
     print("Training Finished!")
 
-    # Evaluation cycle with test data
-    print ("Accuracy of trained network with test data:", accuracy.eval({x: x_test, y: y_test}))
+    # Evaluation with test data
+    print ("Accuracy of trained network with test data:", sess.run(accuracy, feed_dict={x: x_test, y: y_test}))
 
 print ("FINISHED!")
+
