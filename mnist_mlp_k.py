@@ -159,7 +159,7 @@ with tf.Session() as sess:
     tb_summary = tf.summary.merge_all()
 
     # Training cycle with training data
-    for epoch in range(STEPS):
+    for i in range(STEPS):
            
             # fetch a batch from training dataset
             batch_x, batch_y = x_train[i*BATCHSIZE:i*BATCHSIZE+BATCHSIZE], y_train[i*BATCHSIZE:i*BATCHSIZE+BATCHSIZE]
