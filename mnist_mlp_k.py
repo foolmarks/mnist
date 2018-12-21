@@ -9,12 +9,6 @@ import sys
 import shutil
 
 
-# hyper-parameters
-LEARNRATE = 0.001
-EPOCHS = 3
-BATCHSIZE = 50
-
-
 #####################################################
 # Set up directories
 #####################################################
@@ -27,9 +21,11 @@ def get_script_directory():
     else:
         return os.path.dirname(path)
 
+    
+SCRIPT_DIR = get_script_directory()
+print('This script is located in: ', SCRIPT_DIR)
 
 # create a directory for the MNIST dataset if it doesn't already exist
-SCRIPT_DIR = get_script_directory()
 MNIST_DIR = os.path.join(SCRIPT_DIR, 'mnist_dir')
 if not (os.path.exists(MNIST_DIR)):
     os.makedirs(MNIST_DIR)
@@ -85,8 +81,8 @@ Based on this information, we know that we have some work to do on the dataset..
 """
 
 # flatten the images
-x_train = x_train.reshape(60000, 784)
-x_test = x_test.reshape(10000, 784)
+x_train = x_train.reshape(len(x_train), 784)
+x_test = x_test.reshape(len(x_test), 784)
 
 # The image pixels are 8bit integers (uint8)
 # scale them from range 0:255 to range 0:1
@@ -97,17 +93,19 @@ x_test = x_test / 255.0
 y_train = tf.keras.utils.to_categorical(y_train)
 y_test = tf.keras.utils.to_categorical(y_test)
 
-# calculate total number of batches
-total_batches = int(len(x_train)/BATCHSIZE)
-
-
-
 print('\nThe datasets now look like this:')
 print("The training dataset shape is: {shp}".format(shp=x_train.shape))
 print("The training labels shape is: {shp}".format(shp=y_train.shape))
 print("The shape of each member of the training data is: {shp}".format(shp=x_train[0].shape))
 print("The shape of each label is: {shp}".format(shp=y_train[0].shape))
 print("The datatype of each label is: {dtyp}".format(dtyp=y_train[0].dtype))
+
+###############################################
+# Hyperparameters
+###############################################
+BATCHSIZE=50
+LEARNRATE=0.0001
+STEPS=int(len(x_train) / BATCHSIZE)
 
 
 #####################################################
@@ -161,27 +159,25 @@ with tf.Session() as sess:
     tb_summary = tf.summary.merge_all()
 
     # Training cycle with training data
-    for epoch in range(EPOCHS):
-        print ("Epoch:", epoch)
-
-        # process all batches
-        for i in range(total_batches):
-            
+    for epoch in range(STEPS):
+           
             # fetch a batch from training dataset
             batch_x, batch_y = x_train[i*BATCHSIZE:i*BATCHSIZE+BATCHSIZE], y_train[i*BATCHSIZE:i*BATCHSIZE+BATCHSIZE]
             
-            # calculate training accuracy & display it every 100 batches
+            # calculate training accuracy & display it every 100 steps
             train_accuracy = sess.run(accuracy, feed_dict={x: batch_x, y: batch_y})
             if i % 100 == 0:
-                print (" Batch:", i, ' Accuracy: ', train_accuracy)
+                print ("Train Step:", i, ' Training Accuracy: ', train_accuracy)
 
             # Run graph for optimization - i.e. do the training
             _, s = sess.run([optimizer, tb_summary], feed_dict={x: batch_x, y: batch_y})
             writer.add_summary(s, i)
 
     print("Training Finished!")
+    writer.close()
 
     # Evaluation with test data
     print ("Accuracy of trained network with test data:", sess.run(accuracy, feed_dict={x: x_test, y: y_test}))
 
-print ("FINISHED! Run tensorboard with: tensorboard --host localhost --port 6006 --logdir=./tb_log")
+print('Run `tensorboard --logdir=%s --port 6006 --host localhost` to see the results.' % TB_LOG_DIR)
+
