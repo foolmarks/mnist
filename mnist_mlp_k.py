@@ -93,6 +93,7 @@ x_test = x_test / 255.0
 y_train = tf.keras.utils.to_categorical(y_train)
 y_test = tf.keras.utils.to_categorical(y_test)
 
+
 print('\nThe datasets now look like this:')
 print("The training dataset shape is: {shp}".format(shp=x_train.shape))
 print("The training labels shape is: {shp}".format(shp=y_train.shape))
@@ -116,18 +117,20 @@ STEPS=int(len(x_train) / BATCHSIZE)
 
 
 # define placeholders for the input data & labels
-x = tf.placeholder('float32', [None, 784])
-y = tf.placeholder('float32', [None,10])
+x = tf.placeholder('float32', [None, 784], name='images_in')
+y = tf.placeholder('float32', [None,10], name='labels_in')
 
 
 # dense, fully-connected layer of 196 nodes, reLu activation
-input_layer = tf.layers.dense(inputs=x, units=196, activation=tf.nn.relu)
+input_layer = tf.layers.dense(inputs=x, units=784, activation=tf.nn.relu)
 # dense, fully-connected layer of 10 nodes, softmax activation
-prediction = tf.layers.dense(inputs=input_layer, units=10, activation=tf.nn.softmax)
+hidden_layer1 = tf.layers.dense(inputs=input_layer, units=196, activation=tf.nn.relu)
+hidden_layer2 = tf.layers.dense(inputs=hidden_layer1, units=10, activation=None)
+prediction = tf.nn.softmax(hidden_layer2)
 
 
 # Define a cross entropy loss function
-loss = tf.reduce_mean(tf.losses.softmax_cross_entropy(logits=prediction, onehot_labels=y))
+loss = tf.reduce_mean(tf.losses.softmax_cross_entropy(logits=hidden_layer2, onehot_labels=y))
 
 # Define the optimizer function
 optimizer = tf.train.AdamOptimizer(learning_rate=LEARNRATE).minimize(loss)
@@ -147,7 +150,6 @@ tf.summary.scalar('accuracy', accuracy)
 #####################################################
 # Create & run the graph in a Session
 #####################################################
-
 
 # Launch the graph
 with tf.Session() as sess:
@@ -180,4 +182,5 @@ with tf.Session() as sess:
     print ("Accuracy of trained network with test data:", sess.run(accuracy, feed_dict={x: x_test, y: y_test}))
 
 print('Run `tensorboard --logdir=%s --port 6006 --host localhost` to see the results.' % TB_LOG_DIR)
+
 
