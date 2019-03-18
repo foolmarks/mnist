@@ -121,9 +121,8 @@ x = tf.placeholder('float32', [None, 784], name='images_in')
 y = tf.placeholder('float32', [None,10], name='labels_in')
 
 
-# dense, fully-connected layer of 196 nodes, reLu activation
+# MLP definition
 input_layer = tf.layers.dense(inputs=x, units=784, activation=tf.nn.relu)
-# dense, fully-connected layer of 10 nodes, softmax activation
 hidden_layer1 = tf.layers.dense(inputs=input_layer, units=196, activation=tf.nn.relu)
 hidden_layer2 = tf.layers.dense(inputs=hidden_layer1, units=10, activation=None)
 prediction = tf.nn.softmax(hidden_layer2)
